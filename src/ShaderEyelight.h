@@ -19,10 +19,12 @@ public:
 	{}
 	virtual ~CShaderEyelight(void) = default;
 
-	virtual Vec3f Shade(const Ray& ray) const override
-	{
+	virtual Vec3f Shade(const Ray& ray) const override{
 		// --- PUT YOUR CODE HERE ---
-		return RGB(0, 0, 0);
+		Vec3f m_color = CShaderFlat::Shade(ray);
+		double angle = ray.hit->GetNormal(ray).dot(ray.dir);
+		double absolute_angle = fabs(angle);
+		Vec3f result = absolute_angle * m_color;
+		return result;
 	}
 };
-

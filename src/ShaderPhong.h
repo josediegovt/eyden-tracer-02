@@ -26,13 +26,46 @@ public:
 	{}
 	virtual ~CShaderPhong(void) = default;
 
-	virtual Vec3f Shade(const Ray& ray) const override
-	{
+	virtual Vec3f Shade(const Ray& ray) const override{
 		// --- PUT YOUR CODE HERE ---
-		return RGB(0, 0, 0);
+		int size = m_scene.m_vpLights.size();
+		Ray light_ray, incident_ray;
+		Vec3f Ca, Cd, Cs;
+		Vec3f difference = 0;
+		Vec3f specular = 0;
+		int i = 0;
+
+		while(i != size){
+			light_ray.org = ray.org + (ray.t * ray.dir);
+			light_ray.t = std::numeric_limits<float>::infinity();
+			incident_ray.org = ray.org + (ray.t * ray.dir);
+			incident_ray.t = std::numeric_limits<float>::infinity();
+			std::optional<Vec3f> lightRadianceLR = m_scene.m_vpLights[i]->Illuminate(light_ray);
+			std::optional<Vec3f> lightRadianceIR = m_scene.m_vpLights[i]->Illuminate(incident_ray);
+			if(!m_scene.Occluded(light_ray)){
+				if(lightRadianceLR){
+					double angle = max(light_ray.dir.dot(ray.hit->GetNormal(ray)), 0.0f);
+					difference += *lightRadianceLR  * angle;
+				}
+				if(lightRadianceIR){
+					Vec3f reflected_direction = incident_ray.dir - (2 * (incident_ray.dir.dot(ray.hit->GetNormal(ray))) * ray.hit->GetNormal(ray));
+					double angle = max(ray.dir.dot(reflected_direction), 0.0f);
+					double power = pow(angle, m_ke);
+					specular += *lightRadianceIR  * power;
+				}
+			}
+			i++;
+		}
+
+		Ca = m_ka * CShaderFlat::Shade(ray);
+		Cd = m_kd * CShaderFlat::Shade(ray).mul(difference);
+		Cs = m_ks * RGB(1,1,1).mul(specular);
+
+		Vec3f result = Ca + Cd + Cs;
+		return result;
 	}
 
-	
+
 private:
 	CScene& m_scene;
 	float 	m_ka;    ///< ambient coefficient

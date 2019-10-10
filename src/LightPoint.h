@@ -16,13 +16,19 @@ public:
 	CLightPoint(Vec3f intensity, Vec3f position)
 		: m_intensity(intensity)
 		, m_position(position)
-	{} 
+	{}
 	virtual ~CLightPoint(void) = default;
 
 	virtual std::optional<Vec3f> Illuminate(Ray& ray) override
 	{
 		// --- PUT YOUR CODE HERE ---
-		return Vec3f();
+		Vec3f direction = m_position - ray.org;
+		double norm_value = norm(direction);
+		ray.dir = normalize(direction);
+		double norm_squared = norm_value * norm_value;
+		Vec3f result = m_intensity / norm_squared;
+		Vec3f result_normalized = normalize(result);
+		return result_normalized;
 	}
 
 

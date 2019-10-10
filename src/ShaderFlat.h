@@ -14,11 +14,11 @@ public:
 	 * @param color The color of the object
 	 */
 	CShaderFlat(Vec3f color = RGB(0.5f, 0.5f, 0.5f)) : m_color(color) {}
-  
+
 	virtual Vec3f Shade(const Ray& ray = Ray()) const override
 	{
 		// --- PUT YOUR CODE HERE ---
-		return RGB(0, 0, 0);
+		return m_color;
 	}
 
 private:
